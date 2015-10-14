@@ -1,0 +1,27 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2015.08.24 18:41:47 =~=~=~=~=~=~=~=~=~=~=~=
+
+> 
+> lua_senddata("rx -X u-boot.bin",true);
+stdin:1: attempt to call global 'lua_senddata' (a nil value)
+> lua_xmodem_rcv("D:\\00_Share\\");
+stdin:1: attempt to call global 'lua_xmodem_rcv' (a nil value)
+> lua_xmodem_rcv("D:\\00_Share\\");
+stdin:1: attempt to call global 'lua_xmodem_rcv' (a nil value)
+> lua_xmodem_rcv("D:\\00_Share\\");
+stdin: bad header in precompiled chunk
+> lua_xmodem_rcv("D:\\00_Share\\");                  nil}
+stdin:1: ')' expected near '}'
+> lua_xmodem_rcv("D:\\00_Share\\");                  nil);
+stdin:1: attempt to call global 'lua_xmodem_rcv' (a nil value)
+> lua_help();
+stdin:1: attempt to call global 'lua_help' (a nil value)
+> dir
+>> ;
+stdin:2: '=' expected near ';'
+> dir;
+stdin:1: '=' expected near ';'
+> ls;
+stdin:1: '=' expected near ';'
+> lua_dir();
+stdin:1: attempt to call global 'lua_dir' (a nil value)
+> 
