@@ -1,85 +1,67 @@
 -- mqtt.lua
 
-BROKER_IP = "192.168.1.2"
-MQTT_PREFIX = "pyhouse/cannontrail"
-CLIENTID = "Irrig-1"
+local Mqtt = {}
+Mqtt.IPv4 = "192.168.1.3"
+Mqtt.Port = 1883
+
+BROKER_IP = "192.168.1.3"
+MQTT_PREFIX = "pyhouse/pinkpoppy"
+MQTT_KEEPALIVE = 120
+CLIENTID = "pyh_sensor_001"
 QOS_0 = 0
 RETAIN_0 = 0
 
+
+function cb_connected(p_arg1)
+    print("cb_connected: ")
+    do_subscribe(m_client, "pyhouse/#")
+end
 function cb_message_received(client, topic, message)
-    print("mqtt message - topic: " .. topic .. ": ")
+    print("cb_message_received - topic: " .. topic .. ": ")
     if message ~= nil then
         print(message)
     end
+end 
+function cb_offline(p_arg1)
+    print("cb_offline: ")
 end
-
-function cb_connect()
-    print("mqtt connecting to" .. BROKER_IP)
-    m:connect(BROKER_IP, 1833, 0)
+function cb_message_sent(p_arg1)
+    print("cb_message_sent: ")
 end
-
-function cb_offline(client)
-    print("mqtt connecting ")
-    tmr.alarm(3, 10000, 0, do_connect)
-end
-
-function cb_message_sent(client)
-    print("mqtt message sent")
-end
-
 function cb_subscribed()
+    print("cb_subscribed: ") 
+end
+function cb_subscribe(p_arg1)
+    print("cb_subscribe: ") 
+--    do_publish(m_client, "sensors/test/temp", "hello")
+end
+function cb_message(conn, topic, data) 
+    print(topic .. ":" ) 
+    if data ~= nil then
+        print(data)
+    end
 end
 
-function do_connect()
+
+function do_connect(p_client)
     print("Connecting to: " .. BROKER_IP)
-    m_client:connect(BROKER_IP, 1883, 0)
+    p_client:connect(Mqtt.IPv4, Mqtt.Port, 0, cb_connected())
 end
-
 function do_subscribe(p_client, p_topic)
-    print("mqtt subscribe to " .. p_topic)
-    p_client:subscribe(p_topic, QOS_0, cb_subscribed)
+    print("Subscribing to: " .. p_topic)
+    m_client:subscribe(p_topic, QOS_0, cb_subscribed)
 end
-
 function do_publish(p_client, p_topic, p_message)
-    print("mqtt publish " .. p_topic)
+    print("Publishing " .. p_topic)
     p_client:publish(p_topic, p_message, QOS_0, RETAIN_0, cb_message_sent)
 end
 
-print("mqtt Start")
-m_client = mqtt.Client(CLIENT_ID, 120)--, "user", "password")
--- m:lwt("/lwt", wifi.sta.getmac(), 0, 0)
-
+print("Mqtt start: " .. node.heap())
+m_client = mqtt.Client(CLIENT_ID, MQTT_KEEPALIVE)--, "user", "password")
+print("After Client: " .. node.heap())
+do_connect(m_client)
+m_client:lwt("/lwt", "offline", 0, 0)
+m_client:on("connect", cb_connected)
 m_client:on("offline", cb_offline)
-
--- on publish message receive event
-m_client:on("message", cb_message_received)
-
-m_client:on("offline", function(con) 
-     print ("mqtt reconnecting(2)-") 
-     print(node.heap())
-     tmr.alarm(3, 10000, 0, do_connect)
-end)
-
-tmr.alarm(4, 1000, 1, function()
- if wifi.sta.status() == 5 then
-     tmr.stop(4)
-     print("Connecting (2) to "..BROKER_IP)
-     m_client:connect(BROKER_IP, 1883, 0, function(conn) 
-          print("mqtt connected")
-          print("mqtt subscribe to ")
-          m_client:subscribe(CLIENTID, 0, function(conn)
-              do_publish(m_client, "sensors/test/temp", "hello")
-          end)
-     end)
- end
-end)
-print("mqtt END")
-
--- function createSliderCallback( which_channel )
---     local audioChannel = which_channel
---     return function ( event )
---         local new_volume = event.value
---         audio.setVolume(new_volume, { channel = audioChannel } )
---     end
--- end
-
+m_client:on("message", cb_message)
+print("mqtt End: " .. node.heap())
